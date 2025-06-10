@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Prolog видео игри и GIF</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      max-width: 700px;
+      margin: 30px auto;
+      background: #121212;
+      color: #eee;
+      padding: 20px;
+      box-shadow: 0 0 15px rgba(255,255,255,0.1);
+      border-radius: 10px;
+      text-align: center;
+    }
+    textarea {
+      width: 90%;
+      max-width: 600px;
+      height: 120px;
+      font-family: monospace;
+      font-size: 16px;
+      margin-top: 10px;
+      border-radius: 6px;
+      border: 2px solid #1db954;
+      padding: 8px;
+      resize: vertical;
+      background: #222;
+      color: #eee;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 25px;
+      font-size: 18px;
+      background-color: #1db954;
+      border: none;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #14833b;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      min-height: 30px;
+      font-weight: bold;
+      color: #1db954;
+    }
+    .game-container {
+      margin-top: 30px;
+      min-height: 160px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #282828;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #1db954;
+    }
+    .game-gif {
+      max-width: 220px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px #1db954;
+    }
+  </style>
+</head>
+<body>
+  <h1>Prolog видео игри и GIF</h1>
+
+  <textarea id="prolog-input">
+game(mario).
+game(zelda).
+game(pacman).
+game(tetris).
+game(sonic).
+  </textarea><br />
+  <button onclick="runProlog()">Изпълни</button>
+
+  <div id="result"></div>
+  <div class="game-container" id="game-animation"></div>
+
+  <script src="https://unpkg.com/tau-prolog"></script>
+  <script>
+    const session = pl.create();
+
+    // Само база знания с факти - игри
+    const knowledge = `
+      game(mario).
+      game(zelda).
+      game(pacman).
+      game(tetris).
+      game(sonic).
+    `;
+
+    session.consult(knowledge);
+
+    const gameAnimations = {
+      mario: '<img src="https://media.giphy.com/media/U7MziWqByY2Za/giphy.gif" class="game-gif" alt="Mario GIF" />',
+      zelda: '<img src="https://media.giphy.com/media/WXQJ0k1jOMzIQ/giphy.gif" class="game-gif" alt="Zelda GIF" />',
+      pacman: '<img src="https://media.giphy.com/media/l0MYB8Ory7Hqefo9a/giphy.gif" class="game-gif" alt="Pacman GIF" />',
+      tetris: '<img src="https://media.giphy.com/media/3o7aD2saalBwwftBIY/giphy.gif" class="game-gif" alt="Tetris GIF" />',
+      sonic: '<img src="https://media.giphy.com/media/11sBLVxNs7v6WA/giphy.gif" class="game-gif" alt="Sonic GIF" />'
+    };
+
+    function runProlog() {
+      const input = document.getElementById("prolog-input").value.trim();
+      const resultDiv = document.getElementById("result");
+      const animDiv = document.getElementById("game-animation");
+
+      resultDiv.innerHTML = "";
+      animDiv.innerHTML = "";
+
+      session.query(input);
+      session.answers(answer => {
+        if(answer === false) {
+          if(resultDiv.innerHTML === "") {
+            resultDiv.innerHTML = "<p>Няма резултати за тази заявка.</p>";
+          }
+          return;
+        }
+        const str = pl.format_answer(answer);
+        if (str === "false.") {
+          resultDiv.innerHTML = "<p>Няма резултати за тази заявка.</p>";
+          return;
+        }
+        resultDiv.innerHTML += `<p>${str}</p>`;
+
+        // Вземаме името на играта от отговора
+        const match = str.match(/X = (\w+)/);
+        if (match) {
+          const game = match[1];
+          if (gameAnimations[game]) {
+            animDiv.innerHTML = gameAnimations[game];
+          } else {
+            animDiv.innerHTML = "<p>Няма GIF за тази игра.</p>";
+          }
+        }
+      });
+    }
+  </script>
+
+</body>
+</html>
